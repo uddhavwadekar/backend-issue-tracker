@@ -48,13 +48,19 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
+   @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        
+        // ALLOW YOUR VERCEL URL + LOCALHOST
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:3000", 
+            "https://frontend-issue-tracker.vercel.app" // <--- PASTE YOUR VERCEL URL HERE
+        ));
+        
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(true); // Allow cookies/login sessions
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
