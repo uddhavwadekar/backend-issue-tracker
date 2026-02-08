@@ -146,14 +146,28 @@ public class IssueController {
     @PutMapping("/{id}/duedate")
     public ResponseEntity<?> updateDueDate(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         try {
-            String dateStr = payload.get("date");
-            LocalDateTime date = dateStr == null ? null : LocalDateTime.parse(dateStr);
-            return issueRepository.findById(id).map(issue -> {
+            Optional<Issue> issueOpt = issueRepository.findById(id);
+            if (issueOpt.isPresent()) {
+                Issue issue = issueOpt.get();
+                String dateStr = payload.get("date"); // e.g. "2023-10-25"
+                
+                // Handle different date formats safely
+                LocalDateTime date = null;
+                if (dateStr != null && !dateStr.isEmpty()) {
+                    // Append time if it's just a date string
+                    if (dateStr.length() == 10) { 
+                        dateStr += "T00:00:00"; 
+                    }
+                    date = LocalDateTime.parse(dateStr);
+                }
+                
                 issue.setDueDate(date);
-                return ResponseEntity.ok(issueRepository.save(issue));
-            }).orElse(ResponseEntity.notFound().build());
+                Issue saved = issueRepository.save(issue);
+                return ResponseEntity.ok(saved);
+            }
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid date format");
+            return ResponseEntity.badRequest().body("Invalid date format: " + e.getMessage());
         }
     }
 
@@ -209,12 +223,11 @@ public class IssueController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-// --- DELETE ATTACHMENT ---
-    @DeleteMapping("/attachments/{attachmentId}")
+@DeleteMapping("/attachments/{attachmentId}")
     public ResponseEntity<?> deleteAttachment(@PathVariable Long attachmentId) {
         if (attachmentRepository.existsById(attachmentId)) {
             attachmentRepository.deleteById(attachmentId);
-            return ResponseEntity.ok("Attachment deleted successfully");
+            return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -315,3 +328,4 @@ public class IssueController {
     }
 
 }
+
