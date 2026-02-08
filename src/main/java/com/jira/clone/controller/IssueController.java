@@ -209,6 +209,16 @@ public class IssueController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+// --- DELETE ATTACHMENT ---
+    @DeleteMapping("/attachments/{attachmentId}")
+    public ResponseEntity<?> deleteAttachment(@PathVariable Long attachmentId) {
+        if (attachmentRepository.existsById(attachmentId)) {
+            attachmentRepository.deleteById(attachmentId);
+            return ResponseEntity.ok("Attachment deleted successfully");
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
     @PostMapping("/{id}/checklists")
     public ResponseEntity<?> addChecklist(@PathVariable Long id, @RequestParam String name) {
         return issueRepository.findById(id).map(issue -> {
@@ -303,4 +313,5 @@ public class IssueController {
         }
         return ResponseEntity.badRequest().build();
     }
+
 }
